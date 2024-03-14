@@ -6,7 +6,7 @@ import 'package:smartcanteen/data%20models/commomLists/lists.dart';
 import 'package:smartcanteen/data%20models/loginModel.dart';
 
 Future<String> rateFoodApi(final itemId,final rating, final review) async {
-
+  print("c_id $canteenID");
   try {
     final url = Uri.parse('$baseUrl/reviews/');
     final response = await http.post(
@@ -15,7 +15,7 @@ Future<String> rateFoodApi(final itemId,final rating, final review) async {
     "rating": rating.toString(),
     "review":review.toString(),
     "user": userId.toString(),
-    "r_id": "5",
+    "r_id": canteenID,
     "ritem_id": itemId.toString()
 },
     );

@@ -46,18 +46,6 @@ class _AddMenuScreenState extends State<AddMenuScreen> {
     quantityController = TextEditingController();
   }
 
-  //@override
-  // void dispose() {
-  //   nameController.dispose();
-  //   priceController.dispose();
-  //   countController.dispose();
-  //   descriptionController.dispose();
-  //   categoryController.dispose();
-  //   descriptionController.dispose();
-  //   super.dispose();
-  // }
-
-
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
 
@@ -178,22 +166,7 @@ class _AddMenuScreenState extends State<AddMenuScreen> {
                   return null;
                 },
               ),
-              // SizedBox(height: 10),
-              // TextFormField(
-              //   controller: categoryController,
-              //   decoration: InputDecoration(
-              //     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              //     labelText: 'Category'),
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Please enter a category';
-              //     }
-              //     return null;
-              //   },
-              // ),
               SizedBox(height: 10,),
-              
-
 Container(
   height: 60,
   decoration: BoxDecoration(
@@ -207,7 +180,7 @@ Container(
                   _selectedCategory = newValue;
                 });
               },
-              items: <String>['meals', 'snack', 'juice'].map((String value) {
+              items: <String>['meals', 'snack', 'drinks'].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -238,7 +211,7 @@ Container(
   }
 
   addItemFunc() async{
-    isLoading.value = true;
+    isLoading.value = true;print(userId);
     final item = await AddItemModel(name: nameController.text, price: priceController.text, description: descriptionController.text, category: _selectedCategory!, disprice: discountpriceController.text, imgFileurl: _pickedImagePath!, quantity: countController.text, availabilityStatus: true, canteenId: userId.toString());
                    final resp = await addItemApi(item);
                    if(resp == "success"){

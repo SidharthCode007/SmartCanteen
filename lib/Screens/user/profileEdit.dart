@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartcanteen/Screens/user/homescreen.dart';
 import 'package:smartcanteen/Services/editPasswordApi.dart';
+import 'package:smartcanteen/data%20models/commomLists/lists.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   @override
@@ -11,22 +12,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   TextEditingController passwordController = TextEditingController();
   TextEditingController rePasswordController = TextEditingController();
-  // TextEditingController _nameController = TextEditingController();
-  // TextEditingController _emailController = TextEditingController();
-  // TextEditingController _departmentController = TextEditingController();
-  // TextEditingController _usernameController = TextEditingController();
-  // TextEditingController _passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    // Initialize controllers with existing profile data
-    // _nameController.text = "John Doe";
-    // _emailController.text = "john.doe@example.com";
-    // _departmentController.text = "Engineering";
-    // _usernameController.text = "john_doe";
-    // _passwordController.text = "password123";
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,16 +61,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ),
       ),
     ),
-            // buildTextField("Name", _nameController),
-            // buildTextField("Email", _emailController),
-            // buildTextField("Department", _departmentController),
-            // buildTextField("Username", _usernameController),
-            // buildTextField("Password", _passwordController, isPassword: true),
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async{
-                // Implement save/update logic
-                
                 saveProfileChanges();
               },
               child: Text('Save Changes'),
@@ -116,9 +94,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     if (res == "success") {
        ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Profile updated successfully!'),
+        content: Text('Password updated successfully!'),
       ),
     );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomeScreen(userType: userTypes!),));
     }
     else{
       ScaffoldMessenger.of(context).showSnackBar(

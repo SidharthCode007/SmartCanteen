@@ -9,8 +9,9 @@ import 'package:smartcanteen/data%20models/commomLists/lists.dart';
 class ItemDetailsScreen extends StatefulWidget {
   //final String usertype;
   final int id;
+  final price;
 
-  ItemDetailsScreen({required this.id, });
+  ItemDetailsScreen({required this.id, required this.price });
 
   @override
   _ItemDetailsScreenState createState() => _ItemDetailsScreenState();
@@ -28,7 +29,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
         'name': currentItem!.mitemName,
         'itemid': currentItem!.mitemId,
         'itemcount': quantity,
-        'itemprice':  userTypes == "staff"? currentItem!.mdiscountprice: currentItem!.mprice,
+        'itemprice':  widget.price,
         'subtotal': tprice,
         'canteenId': currentItem!.mcanteenId
       });
@@ -50,7 +51,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     if (responce != null) {
       isFound = true;
       currentItem = responce[0];
-      tprice = currentItem!.mprice * quantity;
+      tprice = widget.price * quantity;
     }
     setState(() {
       
@@ -60,8 +61,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
   void incrementQuantity() {
     setState(() {
       quantity++;
-      tprice = 
-       userTypes == "staff"?currentItem!.mdiscountprice * quantity: currentItem!.mprice * quantity;
+      tprice = widget.price*quantity;
     });
     print(tprice);
   }
@@ -71,7 +71,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     if (quantity > 1) {
       setState(() {
         quantity--;
-        tprice = userTypes == "staff"?currentItem!.mdiscountprice * quantity: currentItem!.mprice * quantity;
+        tprice = widget.price*quantity;
       });
     }
     print(tprice);
@@ -121,7 +121,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
             // Availability
 Text(
-  currentItem!.availabilityStatus ? 'Available' : 'Sorry! Item not available',
+  currentItem!.availabilityStatus ? '${currentItem!.quantity} Available' : 'Sorry! Item not available',
   style: TextStyle(
     fontSize: 16,
     color: currentItem!.availabilityStatus ? Colors.green : Colors.red, // Optional: Use different colors for availability status
@@ -164,12 +164,24 @@ SizedBox(height: 8),
             // Order Button
            ElevatedButton(
   onPressed: currentItem!.availabilityStatus ? () {
-    addToCartList();
+    if (quantity > currentItem!.quantity) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Sorry! This much item currently not available."),
+            backgroundColor: Color.fromARGB(255, 198, 204, 198),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(10),
+            duration: Duration(seconds: 8)));
+    }
+    else{
+      addToCartList();
     print(cartitemlist);
+
       Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => cartscreen()),
             );
+    }
+    
   } : null,
   child: Text('Order Now'),
 )

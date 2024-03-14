@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smartcanteen/Screens/user/cartscreen.dart';
 import 'package:smartcanteen/Services/getAllmenuApi.dart';
-import 'package:smartcanteen/Services/orderHistory.dart';
 import 'package:smartcanteen/Services/signoutApi.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:smartcanteen/data models/Get Food Models/getAllMenu.dart';
@@ -25,8 +23,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late bool _isLoading = true;
-
+  ValueNotifier<bool> isLoading = ValueNotifier(true);
+  bool isFounditem = false;
+  
   @override
   void initState() {
     super.initState();
@@ -69,23 +68,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getMenu() async {
-    setState(() {
-      _isLoading = true;
-    });
     final response = await getAllMenuApi();
     print("FI");
     print(response);
     if (response != null) {
+      canteenID = response[0].mcanteenId.toString();
+      isLoading.value = false;
+      isFounditem = true;
       allFoodItems = response;
     }
-    setState(() {
-      _isLoading = false;
-    });
+    else{
+      isLoading.value = false;
+      isFounditem = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return 
+    ValueListenableBuilder(
+      valueListenable: isLoading, 
+      builder: (context, isLoadingValue, child) {
+        if (isLoadingValue) {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator(),),
+          );
+        }
+        else{
+          return Scaffold(
       key: _scaffoldKey,
       drawer: Drawer(
         width: 250,
@@ -174,11 +184,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Icon(Icons.person),
         ),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : allFoodItems.isEmpty
-              ? Center(child: Text("No items found"))
-              : DefaultTabController(
+      body: isFounditem
+              ? 
+              DefaultTabController(
                   length: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -199,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             Tab(
                               height: 80,
-                              text: 'Juice',
+                              text: 'Drinks',
                               icon: ClipOval(
                                 child: Image.asset('assets/image3.jpg',
                                     width: 60, height: 50, fit: BoxFit.cover),
@@ -246,8 +254,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                ),
+                ): Center(child: Text("No items found"))
     );
+        }
+      },);
+    
   }
 
   Widget buildCardList({required int tabIndex}) {
@@ -264,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
-          childAspectRatio: 0.83),
+          childAspectRatio: 0.6),
       itemCount: filteredItems.length,
       itemBuilder: (context, index) {
         final myItem = filteredItems[index];
@@ -272,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   // height:60,
@@ -287,21 +299,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 ListTile(
                   title: Text(
                     myItem.mitemName,
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
                   ),
                   subtitle: Column(
                     children: [
                       widget.userType == "staff"
                           ? Text(
                               'Price: ₹' + myItem.mdiscountprice.toString(),
-                              style: TextStyle(fontSize: 10),
+                              style: TextStyle(fontSize: 15),
                             )
                           : Text(
                               'Price: ₹' + myItem.mprice.toString(),
                               style: TextStyle(fontSize: 10),
                             ),
                       RatingBar.builder(
-                        initialRating: 4,
+                        initialRating: double.parse(myItem.mrating.toString()),
                         //minRating: 1,
                         direction: Axis.horizontal,
                         allowHalfRating: true,
@@ -320,18 +332,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ItemDetailsScreen(
-                          id: myItem.mitemId,
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ItemDetailsScreen(
+                            id: myItem.mitemId,
+                            price: widget.userType == "staff"? myItem.mdiscountprice: myItem.mprice
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: Text('Details'),
+                      );
+                    },
+                    child: Text('Details'),
+                  ),
                 )
               ],
             ),
@@ -348,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String getCategoryForTabIndex(int tabIndex) {
     switch (tabIndex) {
       case 1:
-        return 'juice';
+        return 'drinks';
       case 2:
         return 'meals';
       case 3:
